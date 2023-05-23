@@ -1,5 +1,6 @@
 from scrapy.item import Item, Field
 
+
 class TGeElectricity(Item):
     tge_base = Field()
     tge_peak = Field()
