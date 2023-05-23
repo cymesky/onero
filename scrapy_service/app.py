@@ -6,4 +6,3 @@ if __name__ == '__main__':
     process = CrawlerProcess(settings=get_tge_settings())
     process.crawl(TGeSpider)
     process.start()
-
