@@ -1,6 +1,6 @@
 from datetime import datetime
 from spiders.items import TGeElectricity
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from .db_engine import engine
 from .db_models import (
@@ -15,9 +15,9 @@ from .db_models import (
 
 class TgePipeline:
     @classmethod
-    def __init__(self):
-        self.engine = engine
-        self.session = Session(bind=self.engine)
+    def __init__(cls):
+        cls.engine = engine
+        cls.session = Session(bind=cls.engine)
 
     def process_item(self, item, spider):
         tge_electricity = TGeElectricity(item)
@@ -41,8 +41,7 @@ class TgePipeline:
 
             with self.engine.connect() as connection:
                 if connection.closed:
-                    raise OperationalError(
-                        "Connection error: connection was closed")
+                    raise SQLAlchemyError("Connection error: connection was closed")
 
                 for name, values in tge_electricity.items():
                     if name in table_mapping:
@@ -61,8 +60,5 @@ class TgePipeline:
                     else:
                         raise ValueError("Unsupported type")
 
-        except OperationalError as e:
-            raise OperationalError("Connection error", + str(e))
-
-    def close_spider(self, spider):
-        self.client.close()
+        except SQLAlchemyError as e:
+            return str(e.__dict__['orig'])
